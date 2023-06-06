@@ -22,6 +22,11 @@ class Task(models.Model):
         max_length=255, default=State.NEW_TASK, choices=State.choices
     )
     priority = models.IntegerField(blank=True, default=0)
-    author = models.OneToOneField(User, on_delete=models.CASCADE, related_name='author')
-    assigned = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, related_name='assigned')
+    author = models.OneToOneField(User, on_delete=models.CASCADE, related_name="author")
+    assigned = models.OneToOneField(
+        User, on_delete=models.SET_NULL, null=True, related_name="assigned"
+    )
     tags = models.ManyToManyField(Tag)
+
+    def __str__(self) -> str:
+        return self.title

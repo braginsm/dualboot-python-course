@@ -1,5 +1,6 @@
 import socket
 from threading import Thread
+import logging
 
 HOST = "127.0.0.1"
 PORT = 12345
@@ -20,7 +21,7 @@ def get_name(message: str) -> str:
 
 def new_client(connection: socket.socket, ip: str, conn_id: int) -> None:
     msg_prefix = f"{ip} {conn_id}: "
-    print(msg_prefix + "new connection")
+    logging.log(msg=msg_prefix + "new connection")
     with connection:
         name = ""
         try:
@@ -31,12 +32,12 @@ def new_client(connection: socket.socket, ip: str, conn_id: int) -> None:
                 msg = data.decode()
                 if not name:
                     name = get_name(msg)
-                print(msg_prefix + msg)
+                logging.log(msg=msg_prefix + msg)
                 send_to_other(msg, conn_id)
         except OSError:
             None
     exit_message = f"{name} left"
-    print(msg_prefix + exit_message)
+    logging.log(msg=msg_prefix + exit_message)
     send_to_other(exit_message, conn_id)
     del connections[conn_id]
 

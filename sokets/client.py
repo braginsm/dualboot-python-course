@@ -14,10 +14,10 @@ def receive_messages(s: socket.socket) -> None:
                 break
             print(data.decode())
     except OSError:
-        return
+        print("Connection is closed")
 
 
-def send_message(s: socket.socket) -> None:
+def send_message(s: socket.socket, username: str) -> None:
     try:
         while True:
             message = input()
@@ -39,7 +39,7 @@ with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         receive_thread = Thread(target=receive_messages, args=(s,))
         receive_thread.start()
 
-        send_thread = Thread(target=send_message, args=(s,))
+        send_thread = Thread(target=send_message, args=(s, username))
         send_thread.start()
 
         receive_thread.join()

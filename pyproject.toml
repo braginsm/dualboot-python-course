@@ -11,12 +11,16 @@ psycopg2-binary = "^2.9.6"
 djangorestframework = "^3.14.0"
 django-filter = "^23.2"
 drf-yasg = "^1.21.5"
+djangorestframework-simplejwt = "^5.2.2"
 
 [tool.poetry.dev-dependencies]
 
 [tool.poetry.group.dev.dependencies]
 black = "^23.3.0"
 pytest-django = "^4.5.2"
+factory-boy = "^3.2.1"
+freezegun = "^1.2.2"
+coverage = "^7.2.7"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]

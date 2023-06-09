@@ -1,9 +1,10 @@
-from django.forms import IntegerField
 from rest_framework import viewsets
+from rest_framework.permissions import IsAuthenticated
 import django_filters
 from task_manager.main.models.tag import Tag
 from task_manager.main.models.task import Task
 from task_manager.main.models.user import User
+from task_manager.main.permissions import DeleteOnlyForStaff
 from task_manager.main.serializers import TagSerializer, TaskSerializer, UserSerializer
 
 
@@ -33,6 +34,7 @@ class TagViewSet(viewsets.ModelViewSet):
     queryset = Tag.objects.order_by("id")
     serializer_class = TagSerializer
     filterset_class = TagFilter
+    permission_classes = [DeleteOnlyForStaff, IsAuthenticated]
 
 
 class TaskFilter(django_filters.FilterSet):
@@ -55,3 +57,4 @@ class TaskViewSet(viewsets.ModelViewSet):
     )
     serializer_class = TaskSerializer
     filterset_class = TaskFilter
+    permission_classes = [DeleteOnlyForStaff, IsAuthenticated]

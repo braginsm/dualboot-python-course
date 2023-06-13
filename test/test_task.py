@@ -35,11 +35,13 @@ class TestTaskViewSet(TestViewSetBase):
         return result
 
     def test_create(self):
+        self.login()
         task = self.create(self.task_attributes)
         expected_response = self.expected_details(task, self.task_attributes)
         assert self.details_without_keys(task) == expected_response
 
     def test_get_by_id(self):
+        self.login()
         task = self.create(self.task_attributes)
         task_id = task["id"]
         compare_task = self.get_by_id(task_id)
@@ -48,30 +50,35 @@ class TestTaskViewSet(TestViewSetBase):
         )
 
     def test_get_tasks(self):
+        self.login()
         task = self.create(self.task_attributes)
         response = self.get_list()
         tasks = self.response_to_list_dict(response, self.details_without_keys)
         assert self.expected_details(task, self.task_attributes) in tasks
 
     def test_put_task(self):
+        self.login()
         task = self.create(self.task_attributes)
         expected = self.details_without_keys({**task, **self.edit_fields})
         new_task = self.put_by_id(expected, task["id"])
         assert self.details_without_keys(new_task) == expected
 
     def test_patch_task(self):
+        self.login()
         task = self.create(self.task_attributes)
         expected = self.details_without_keys({**task, **self.edit_fields})
         new_task = self.patch_by_id(self.edit_fields, task["id"])
         assert self.details_without_keys(new_task) == expected
 
     def test_delete_task(self):
+        self.login()
         task = self.create(self.task_attributes)
         task_id = task["id"]
         assert self.delete_by_id(task_id)
         assert not self.delete_by_id(task_id)
 
     def test_delete_task_without_permission(self):
+        self.login(is_staff=False)
         task = self.create(self.task_attributes)
         user = User.objects.create_user("test2@test.ru", email=None, password=None)
-        assert not self.delete_by_id(task["id"], user)
+        assert not self.delete_by_id(task["id"])

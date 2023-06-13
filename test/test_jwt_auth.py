@@ -1,6 +1,6 @@
 from datetime import timedelta
 from http import HTTPStatus
-from django.urls import path, reverse
+from django.urls import reverse
 from freezegun import freeze_time
 from rest_framework.test import APITestCase
 
@@ -13,13 +13,15 @@ class TestJWTAuth(APITestCase):
     any_api_url = "http://localhost:8000/api/users/"
 
     @staticmethod
-    def create_user() -> UserFactory:
-        return UserFactory.create()
+    def create_user(**kwargs) -> UserFactory:
+        return UserFactory.create(**kwargs)
 
-    def token_request(self, username: str = None, password: str = "password"):
+    def token_request(
+        self, username: str = None, password: str = "password", is_staff: bool = False
+    ):
         client = self.client_class()
         if not username:
-            username = self.create_user().username
+            username = self.create_user(is_staff=is_staff).username
         return client.post(
             self.token_url, data={"username": username, "password": password}
         )

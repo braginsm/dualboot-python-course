@@ -9,15 +9,15 @@ on:
       - 'develop'
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - name: Run tests
-        env:
-          COVERAGE: true
-          RAILS_ENV: test
-        run: docker-compose --file docker-compose.ci.yml run --rm api pytest
+  # build:
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - name: Run tests
+  #       env:
+  #         COVERAGE: true
+  #         RAILS_ENV: test
+  #       run: docker-compose --file docker-compose.ci.yml run --rm api pytest
 
   test:
     runs-on: ubuntu-latest

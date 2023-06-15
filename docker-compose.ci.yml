@@ -13,6 +13,14 @@ x-db-config:
   DATABASE_HOST: db
   DATABASE_PORT: 5432
   POSTGRES_PASSWORD: pgpassword
+  EMAIL_USE_SSL: 1
+  EMAIL_USE_TLS: 1
+  EMAIL_HOST: smtp.gmail.com
+  EMAIL_HOST_USER: user_name
+  EMAIL_HOST_PASSWORD: password
+  EMAIL_PORT: 465
+  DEFAULT_FROM_EMAIL: 587
+  NEW_RELIC_CONFIG_FILE: /app/newrelic.ini
 
 services:
   api:

@@ -159,7 +159,9 @@ EMAIL_HOST_PASSWORD = os.environ["EMAIL_HOST_PASSWORD"]
 EMAIL_PORT = os.environ["EMAIL_PORT"]
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL")
 
-if os.environ["AWS_ACCESS_KEY_ID"]:
+DJANGO_ENV = "dev"
+
+if DJANGO_ENV != "dev":
     DEFAULT_FILE_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
     PUBLIC_FILE_STORAGE = "core.storage_backends.S3PublicStorage"
     AWS_QUERYSTRING_EXPIRE = 10 * 60

@@ -1,61 +1,68 @@
-from typing import List, OrderedDict
-from task_manager.main.models.tag import Tag
-from task_manager.main.models.user import User
+from http import HTTPStatus
 from task_manager.main.serializers import TagSerializer
-from test.base import TestViewSetBase
+from test.factories.base import TestViewSetBase
+from test.factories.tag_factory import TagFactory
 
 
 class TestTagViewSet(TestViewSetBase):
     basename = "tags"
-    tag_attributes = {"title": "Test tag"}
+    fields = TagSerializer.Meta.fields
     edit_fields = {"title": "New test tag"}
 
     @staticmethod
-    def expected_details(entity: dict, attributes: dict):
+    def expected_details(entity: dict, attributes: dict) -> dict:
         return {"id": entity["id"], **attributes}
 
-    def test_create(self):
-        self.login()
-        tag = self.create(self.tag_attributes)
-        expected_response = self.expected_details(tag, self.tag_attributes)
+    def test_create(self) -> None:
+        tag_attributes = self.to_serialize(TagFactory.build())
+        tag = self.create(tag_attributes)
+        expected_response = self.expected_details(tag, tag_attributes)
+
         assert tag == expected_response
 
-    def test_get_by_id(self):
-        self.login()
-        tag = self.create(self.tag_attributes)
-        tag_id = tag["id"]
-        compare_tag = self.get_by_id(tag_id)
-        assert compare_tag == self.expected_details(tag, self.tag_attributes)
+    def test_retrieve(self) -> None:
+        tag_attributes = self.to_serialize(TagFactory.build())
+        created_tag = self.create(tag_attributes)
+        retrieved_tag = self.retrieve(created_tag["id"])
 
-    def test_get_tags(self):
-        self.login()
-        tag = self.create(self.tag_attributes)
-        response = self.get_list()
+        assert created_tag == retrieved_tag
+
+    def test_list(self):
+        tag_attributes = self.to_serialize(TagFactory.build())
+        tag = self.create(tag_attributes)
+        response = self.list()
         tags = self.response_to_list_dict(response)
-        assert self.expected_details(tag, self.tag_attributes) in tags
 
-    def test_put_tag(self):
-        self.login()
-        tag = self.create(self.tag_attributes)
-        expected = {**tag, **self.edit_fields}
-        new_tag = self.put_by_id(expected, tag["id"])
+        assert self.expected_details(tag, tag_attributes) in tags
+
+    def test_update(self):
+        tag_attributes = self.to_serialize(TagFactory.build())
+        tag = self.create(tag_attributes)
+        new_attributes = {**tag_attributes, **self.edit_fields}
+        expected = self.expected_details(tag, new_attributes)
+        new_tag = self.update(expected, tag["id"])
+
         assert new_tag == expected
 
-    def test_patch_tag(self):
-        self.login()
-        tag = self.create(self.tag_attributes)
+    def test_patch(self):
+        tag_attributes = self.to_serialize(TagFactory.build())
+        tag = self.create(tag_attributes)
         expected = {**tag, **self.edit_fields}
-        new_tag = self.patch_by_id(self.edit_fields, tag["id"])
+        new_tag = self.patch(self.edit_fields, tag["id"])
+
         assert new_tag == expected
 
-    def test_delete_tag(self):
-        self.login()
-        tag = self.create(self.tag_attributes)
+    def test_delete(self):
+        tag_attributes = self.to_serialize(TagFactory.build())
+        tag = self.create(tag_attributes)
         tag_id = tag["id"]
-        assert self.delete_by_id(tag_id)
-        assert not self.delete_by_id(tag_id)
+        self.user.is_staff = True
 
-    def test_delete_tag_without_permission(self):
-        self.login(is_staff=False)
-        tag = self.create(self.tag_attributes)
-        assert not self.delete_by_id(tag["id"])
+        assert self.delete(tag_id)
+        assert self.request_delete(tag_id).status_code == HTTPStatus.NOT_FOUND
+
+    def test_delete_without_permission(self):
+        tag_attributes = self.to_serialize(TagFactory.build())
+        tag = self.create(tag_attributes)
+
+        assert self.request_delete(tag["id"]).status_code == HTTPStatus.FORBIDDEN

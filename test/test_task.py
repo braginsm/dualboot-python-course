@@ -1,4 +1,3 @@
-import datetime
 from http import HTTPStatus
 from task_manager.main.models.task import Task
 from task_manager.main.serializers import TaskSerializer
@@ -12,13 +11,6 @@ class TestTaskViewSet(TestViewSetBase):
     fields = TaskSerializer.Meta.fields
     edit_fields = {"title": "New test task", "description": "new description"}
     except_keys = ["date_update", "date_create"]
-
-    # @classmethod
-    # def setUpTestData(cls) -> None:
-    #     super().setUpTestData()
-    #     cls.task_attributes["author"] = cls.user.id
-    #     cls.task_attributes["assigned"] = cls.user.id
-    #     cls.task_attributes["tags"] = [Tag.objects.create(title="Test tag").id]
 
     @staticmethod
     def expected_details(entity: dict, attributes: dict) -> dict:

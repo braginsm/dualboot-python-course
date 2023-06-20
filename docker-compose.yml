@@ -28,6 +28,10 @@ services:
       EMAIL_PORT: 465
       DEFAULT_FROM_EMAIL: 587
       NEW_RELIC_CONFIG_FILE: /app/newrelic.ini
+      AWS_ACCESS_KEY_ID: ""
+      AWS_SECRET_ACCESS_KEY: ""
+      AWS_STORAGE_BUCKET_NAME: ""
+      AWS_S3_REGION_NAME: ""
     command: newrelic-admin run-program python manage.py runserver 0.0.0.0:8000
 
   db:

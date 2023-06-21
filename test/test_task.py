@@ -1,31 +1,28 @@
-from task_manager.main.models.tag import Tag
+from http import HTTPStatus
 from task_manager.main.models.task import Task
-from task_manager.main.models.user import User
-from test.base import TestViewSetBase
+from task_manager.main.serializers import TaskSerializer
+from test.factories.base import TestViewSetBase
+from test.factories.tag_factory import TagFactory
+from test.factories.task_factory import TaskFactory
 
 
 class TestTaskViewSet(TestViewSetBase):
     basename = "tasks"
-    task_attributes = {
-        "title": "Test task",
-        "description": "Test description",
-        "date_deadline": "2023-06-08T06:57:25Z",
-        "state": Task.State.IN_DEVELOPMENT,
-        "priority": 10,
-    }
+    fields = TaskSerializer.Meta.fields
     edit_fields = {"title": "New test task", "description": "new description"}
     except_keys = ["date_update", "date_create"]
 
-    @classmethod
-    def setUpTestData(cls) -> None:
-        super().setUpTestData()
-        cls.task_attributes["author"] = cls.user.id
-        cls.task_attributes["assigned"] = cls.user.id
-        cls.task_attributes["tags"] = [Tag.objects.create(title="Test tag").id]
-
     @staticmethod
-    def expected_details(entity: dict, attributes: dict):
-        return {"id": entity["id"], **attributes}
+    def expected_details(entity: dict, attributes: dict) -> dict:
+        result = {
+            "id": entity["id"],
+            **attributes,
+            "assigned": attributes["assigned_id"],
+            "author": attributes["author_id"],
+        }
+        del result["assigned_id"]
+        del result["author_id"]
+        return result
 
     def details_without_keys(self, entity: dict):
         result = entity
@@ -34,51 +31,77 @@ class TestTaskViewSet(TestViewSetBase):
                 del result[key]
         return result
 
-    def test_create(self):
-        self.login()
-        task = self.create(self.task_attributes)
-        expected_response = self.expected_details(task, self.task_attributes)
-        assert self.details_without_keys(task) == expected_response
+    def task_to_dict(self, task: Task) -> dict:
+        result = task.__dict__
+        result["author"] = task.author.id
+        result["assigned"] = task.assigned.id
+        result["tags"] = list(map(lambda tag: tag.id, task.tags.all()))
+        result["date_deadline"] = task.date_deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
+        result["state"] = str(task.state)
+        del result["_state"]
+        return self.details_without_keys(result)
 
-    def test_get_by_id(self):
-        self.login()
-        task = self.create(self.task_attributes)
-        task_id = task["id"]
-        compare_task = self.get_by_id(task_id)
-        assert self.details_without_keys(compare_task) == self.expected_details(
-            task, self.task_attributes
+    def test_create(self) -> None:
+        task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
+        dict_task = self.task_to_dict(task_attributes)
+        created_task = self.create(dict_task)
+        expected_response = self.expected_details(created_task, dict_task)
+
+        assert self.details_without_keys(created_task) == expected_response
+
+    def test_retrieve(self) -> None:
+        task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
+        dict_task = self.task_to_dict(task_attributes)
+        created_task = self.create(dict_task)
+        retrieved_task = self.retrieve(created_task["id"])
+        expected_response = self.expected_details(created_task, dict_task)
+
+        assert self.details_without_keys(retrieved_task) == expected_response
+
+    def test_list(self):
+        task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
+        dict_task = self.task_to_dict(task_attributes)
+        created_task = self.create(dict_task)
+        response = self.list()
+        tags = self.response_to_list_dict(response, self.details_without_keys)
+
+        assert self.expected_details(created_task, dict_task) in tags
+
+    def test_update(self):
+        task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
+        dict_task = self.task_to_dict(task_attributes)
+        created_task = self.create(dict_task)
+        new_attributes = {**dict_task, **self.edit_fields}
+        expected = self.expected_details(created_task, new_attributes)
+        new_task = self.update(expected, created_task["id"])
+
+        assert self.details_without_keys(new_task) == expected
+
+    def test_patch(self):
+        task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
+        dict_task = self.task_to_dict(task_attributes)
+        created_task = self.create(dict_task)
+        new_attributes = {**dict_task, **self.edit_fields}
+        expected = self.expected_details(created_task, new_attributes)
+        new_task = self.update(expected, created_task["id"])
+
+        assert self.details_without_keys(new_task) == expected
+
+    def test_delete(self):
+        task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
+        dict_task = self.task_to_dict(task_attributes)
+        created_task = self.create(dict_task)
+        task_id = created_task["id"]
+        self.user.is_staff = True
+
+        assert self.delete(task_id)
+        assert self.request_delete(task_id).status_code == HTTPStatus.NOT_FOUND
+
+    def test_delete_without_permission(self):
+        task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
+        dict_task = self.task_to_dict(task_attributes)
+        created_task = self.create(dict_task)
+
+        assert (
+            self.request_delete(created_task["id"]).status_code == HTTPStatus.FORBIDDEN
         )
-
-    def test_get_tasks(self):
-        self.login()
-        task = self.create(self.task_attributes)
-        response = self.get_list()
-        tasks = self.response_to_list_dict(response, self.details_without_keys)
-        assert self.expected_details(task, self.task_attributes) in tasks
-
-    def test_put_task(self):
-        self.login()
-        task = self.create(self.task_attributes)
-        expected = self.details_without_keys({**task, **self.edit_fields})
-        new_task = self.put_by_id(expected, task["id"])
-        assert self.details_without_keys(new_task) == expected
-
-    def test_patch_task(self):
-        self.login()
-        task = self.create(self.task_attributes)
-        expected = self.details_without_keys({**task, **self.edit_fields})
-        new_task = self.patch_by_id(self.edit_fields, task["id"])
-        assert self.details_without_keys(new_task) == expected
-
-    def test_delete_task(self):
-        self.login()
-        task = self.create(self.task_attributes)
-        task_id = task["id"]
-        assert self.delete_by_id(task_id)
-        assert not self.delete_by_id(task_id)
-
-    def test_delete_task_without_permission(self):
-        self.login(is_staff=False)
-        task = self.create(self.task_attributes)
-        user = User.objects.create_user("test2@test.ru", email=None, password=None)
-        assert not self.delete_by_id(task["id"])

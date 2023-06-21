@@ -15,7 +15,7 @@ class TestUserViewSet(TestViewSetBase):
         return {
             **attributes,
             "id": entity["id"],
-            # "avatar_picture": entity["avatar_picture"],
+            "avatar_picture": entity["avatar_picture"],
         }
 
     def test_create(self) -> None:
@@ -40,12 +40,14 @@ class TestUserViewSet(TestViewSetBase):
 
         assert self.expected_details(user, user_attributes) in users
 
-    def test_put_user(self):
-        user_attributes = self.to_serialize(UserFactory.build())
+    def test_update(self):
+        fake_user = UserFactory.build()
+        user_attributes = self.to_serialize(fake_user)
         user = self.create(user_attributes)
         new_attributes = {**user_attributes, **self.edit_fields}
+        del new_attributes["avatar_picture"]
         expected = self.expected_details(user, new_attributes)
-        new_user = self.update(expected, user["id"])
+        new_user = self.update(new_attributes, user["id"])
 
         assert new_user == expected
 

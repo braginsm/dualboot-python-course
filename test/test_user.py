@@ -1,61 +1,66 @@
-from typing import List, OrderedDict
+from http import HTTPStatus
 from task_manager.main.models.user import User
 from task_manager.main.serializers import UserSerializer
-from test.base import TestViewSetBase
+from test.factories.base import TestViewSetBase
+from test.factories.user_factory import UserFactory
 
 
 class TestUserViewSet(TestViewSetBase):
     basename = "users"
-    user_attributes = {
-        "username": "johnsmith",
-        "first_name": "John",
-        "last_name": "Smith",
-        "email": "john@test.com",
-        "role": User.Roles.DEVELOPER,
-    }
+    fields = UserSerializer.Meta.fields
     edit_fields = {"email": "johnsmith@test.com", "role": User.Roles.MANAGER}
 
     @staticmethod
-    def expected_details(entity: dict, attributes: dict):
-        return {"id": entity["id"], **attributes}
+    def expected_details(entity: dict, attributes: dict) -> dict:
+        return {
+            **attributes,
+            "id": entity["id"],
+            # "avatar_picture": entity["avatar_picture"],
+        }
 
-    def test_create(self):
-        self.login()
-        user = self.create(self.user_attributes)
-        expected_response = self.expected_details(user, self.user_attributes)
+    def test_create(self) -> None:
+        user_attributes = self.to_serialize(UserFactory.build())
+        user = self.create(user_attributes)
+        expected_response = self.expected_details(user, user_attributes)
+
         assert user == expected_response
 
-    def test_get_by_id(self):
-        self.login()
-        user = self.create(self.user_attributes)
-        user_id = user["id"]
-        compare_user = self.get_by_id(user_id)
-        assert compare_user == self.expected_details(user, self.user_attributes)
+    def test_retrieve(self) -> None:
+        user_attributes = self.to_serialize(UserFactory.build())
+        created_user = self.create(user_attributes)
+        retrieved_user = self.retrieve(created_user["id"])
 
-    def test_get_users(self):
-        self.login()
-        user = self.create(self.user_attributes)
-        response = self.get_list()
+        assert created_user == retrieved_user
+
+    def test_list(self):
+        user_attributes = self.to_serialize(UserFactory.build())
+        user = self.create(user_attributes)
+        response = self.list()
         users = self.response_to_list_dict(response)
-        assert self.expected_details(user, self.user_attributes) in users
+
+        assert self.expected_details(user, user_attributes) in users
 
     def test_put_user(self):
-        self.login()
-        user = self.create(self.user_attributes)
-        expected = {**user, **self.edit_fields}
-        new_user = self.put_by_id(expected, user["id"])
+        user_attributes = self.to_serialize(UserFactory.build())
+        user = self.create(user_attributes)
+        new_attributes = {**user_attributes, **self.edit_fields}
+        expected = self.expected_details(user, new_attributes)
+        new_user = self.update(expected, user["id"])
+
         assert new_user == expected
 
-    def test_patch_user(self):
-        self.login()
-        user = self.create(self.user_attributes)
+    def test_patch(self):
+        user_attributes = self.to_serialize(UserFactory.build())
+        user = self.create(user_attributes)
         expected = {**user, **self.edit_fields}
-        new_user = self.patch_by_id(self.edit_fields, user["id"])
+        new_user = self.patch(self.edit_fields, user["id"])
+
         assert new_user == expected
 
     def test_delete_user(self):
-        self.login()
-        user = self.create(self.user_attributes)
+        user_attributes = self.to_serialize(UserFactory.build())
+        user = self.create(user_attributes)
         user_id = user["id"]
-        assert self.delete_by_id(user_id)
-        assert not self.delete_by_id(user_id)
+
+        assert self.delete(user_id)
+        assert self.request_delete(user_id).status_code == HTTPStatus.NOT_FOUND

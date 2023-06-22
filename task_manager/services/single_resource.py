@@ -1,10 +1,9 @@
 import copy
-from typing import Any, List
-from requests import Request, Response
+from typing import TYPE_CHECKING, Any, List
+from requests import Request
+from rest_framework.response import Response
 
 from rest_framework import routers
-
-from typing import Any, List, TYPE_CHECKING
 
 from rest_framework import viewsets
 
@@ -41,8 +40,6 @@ class SingleResourceUpdateMixin(BaseViewMixinBaseClass):
         serializer.save()
         return Response(serializer.data)
 
-    def partial_bulk_update(
-        self, request: Request, *args: Any, **kwargs: Any
-    ) -> Response:
+    def partial_bulk_update(self, request: Request, *args: Any, **kwargs: Any) -> Response:
         kwargs["partial"] = True
         return self.bulk_update(request, *args, **kwargs)

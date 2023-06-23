@@ -8,20 +8,12 @@ from test.factories.task_factory import TaskFactory
 
 class TestTaskViewSet(TestViewSetBase):
     basename = "tasks"
-    fields = TaskSerializer.Meta.fields
     edit_fields = {"title": "New test task", "description": "new description"}
     except_keys = ["date_update", "date_create"]
 
     @staticmethod
     def expected_details(entity: dict, attributes: dict) -> dict:
-        result = {
-            "id": entity["id"],
-            **attributes,
-            "assigned": attributes["assigned_id"],
-            "author": attributes["author_id"],
-        }
-        del result["assigned_id"]
-        del result["author_id"]
+        result = {"id": entity["id"], **attributes}
         return result
 
     def details_without_keys(self, entity: dict):
@@ -32,14 +24,7 @@ class TestTaskViewSet(TestViewSetBase):
         return result
 
     def task_to_dict(self, task: Task) -> dict:
-        result = task.__dict__
-        result["author"] = task.author.id
-        result["assigned"] = task.assigned.id
-        result["tags"] = list(map(lambda tag: tag.id, task.tags.all()))
-        result["date_deadline"] = task.date_deadline.strftime("%Y-%m-%dT%H:%M:%SZ")
-        result["state"] = str(task.state)
-        del result["_state"]
-        return self.details_without_keys(result)
+        return self.details_without_keys(TaskSerializer(task).data)
 
     def test_create(self) -> None:
         task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
@@ -53,7 +38,7 @@ class TestTaskViewSet(TestViewSetBase):
         task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
         dict_task = self.task_to_dict(task_attributes)
         created_task = self.create(dict_task)
-        retrieved_task = self.retrieve(created_task["id"])
+        retrieved_task = self.retrieve([created_task["id"]])
         expected_response = self.expected_details(created_task, dict_task)
 
         assert self.details_without_keys(retrieved_task) == expected_response
@@ -102,6 +87,4 @@ class TestTaskViewSet(TestViewSetBase):
         dict_task = self.task_to_dict(task_attributes)
         created_task = self.create(dict_task)
 
-        assert (
-            self.request_delete(created_task["id"]).status_code == HTTPStatus.FORBIDDEN
-        )
+        assert self.request_delete(created_task["id"]).status_code == HTTPStatus.FORBIDDEN

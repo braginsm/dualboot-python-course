@@ -18,16 +18,35 @@ Including another URLconf
 from django.urls import include, path, re_path
 from rest_framework.routers import SimpleRouter
 from task_manager.main.admin import task_manager_admin_site
-from task_manager.main.views import TagViewSet, TaskViewSet, UserViewSet
+from task_manager.main import views
 from rest_framework import permissions
 from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-router = SimpleRouter()
-router.register(r"users", UserViewSet, basename="users")
-router.register(r"tags", TagViewSet, basename="tags")
-router.register(r"tasks", TaskViewSet, basename="tasks")
+from task_manager.services.single_resource import BulkRouter
+
+router = BulkRouter()
+router.register(r"users", views.UserViewSet, basename="users")
+router.register(r"tags", views.TagViewSet, basename="tags")
+router.register(r"tasks", views.TaskViewSet, basename="tasks")
+router.register(r"current-user", views.CurrentUserViewSet, basename="current_user")
+
+users = router.register(r"users", views.UserViewSet, basename="users")
+users.register(
+    r"tasks",
+    views.UserTasksViewSet,
+    basename="user_tasks",
+    parents_query_lookups=["assigned_id"],
+)
+
+tasks = router.register(r"tasks", views.TaskViewSet, basename="tasks")
+tasks.register(
+    r"tags",
+    views.TaskTagsViewSet,
+    basename="task_tags",
+    parents_query_lookups=["task_id"],
+)
 
 schema_view = get_schema_view(
     openapi.Info(
@@ -57,7 +76,5 @@ urlpatterns = [
         schema_view.with_ui("swagger", cache_timeout=0),
         name="schema-swagger-ui",
     ),
-    re_path(
-        r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"
-    ),
+    re_path(r"^redoc/$", schema_view.with_ui("redoc", cache_timeout=0), name="schema-redoc"),
 ]

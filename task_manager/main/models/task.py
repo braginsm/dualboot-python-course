@@ -18,14 +18,10 @@ class Task(models.Model):
     date_create = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
     date_deadline = models.DateTimeField(blank=True)
-    state = models.CharField(
-        max_length=255, default=State.NEW_TASK, choices=State.choices
-    )
+    state = models.CharField(max_length=255, default=State.NEW_TASK, choices=State.choices)
     priority = models.IntegerField(blank=True, default=0)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name="author")
-    assigned = models.ForeignKey(
-        User, on_delete=models.SET_NULL, null=True, related_name="assigned"
-    )
+    assigned = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, related_name="assigned")
     tags = models.ManyToManyField(Tag)
 
     def __str__(self) -> str:

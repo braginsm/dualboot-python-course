@@ -6,7 +6,6 @@ from test.factories.tag_factory import TagFactory
 
 class TestTagViewSet(TestViewSetBase):
     basename = "tags"
-    fields = TagSerializer.Meta.fields
     edit_fields = {"title": "New test tag"}
 
     @staticmethod
@@ -14,21 +13,21 @@ class TestTagViewSet(TestViewSetBase):
         return {"id": entity["id"], **attributes}
 
     def test_create(self) -> None:
-        tag_attributes = self.to_serialize(TagFactory.build())
+        tag_attributes = TagSerializer(TagFactory.build()).data
         tag = self.create(tag_attributes)
         expected_response = self.expected_details(tag, tag_attributes)
 
         assert tag == expected_response
 
     def test_retrieve(self) -> None:
-        tag_attributes = self.to_serialize(TagFactory.build())
+        tag_attributes = TagSerializer(TagFactory.build()).data
         created_tag = self.create(tag_attributes)
-        retrieved_tag = self.retrieve(created_tag["id"])
+        retrieved_tag = self.retrieve([created_tag["id"]])
 
         assert created_tag == retrieved_tag
 
     def test_list(self):
-        tag_attributes = self.to_serialize(TagFactory.build())
+        tag_attributes = TagSerializer(TagFactory.build()).data
         tag = self.create(tag_attributes)
         response = self.list()
         tags = self.response_to_list_dict(response)
@@ -36,7 +35,7 @@ class TestTagViewSet(TestViewSetBase):
         assert self.expected_details(tag, tag_attributes) in tags
 
     def test_update(self):
-        tag_attributes = self.to_serialize(TagFactory.build())
+        tag_attributes = TagSerializer(TagFactory.build()).data
         tag = self.create(tag_attributes)
         new_attributes = {**tag_attributes, **self.edit_fields}
         expected = self.expected_details(tag, new_attributes)
@@ -45,7 +44,7 @@ class TestTagViewSet(TestViewSetBase):
         assert new_tag == expected
 
     def test_patch(self):
-        tag_attributes = self.to_serialize(TagFactory.build())
+        tag_attributes = TagSerializer(TagFactory.build()).data
         tag = self.create(tag_attributes)
         expected = {**tag, **self.edit_fields}
         new_tag = self.patch(self.edit_fields, tag["id"])
@@ -53,7 +52,7 @@ class TestTagViewSet(TestViewSetBase):
         assert new_tag == expected
 
     def test_delete(self):
-        tag_attributes = self.to_serialize(TagFactory.build())
+        tag_attributes = TagSerializer(TagFactory.build()).data
         tag = self.create(tag_attributes)
         tag_id = tag["id"]
         self.user.is_staff = True
@@ -62,7 +61,7 @@ class TestTagViewSet(TestViewSetBase):
         assert self.request_delete(tag_id).status_code == HTTPStatus.NOT_FOUND
 
     def test_delete_without_permission(self):
-        tag_attributes = self.to_serialize(TagFactory.build())
+        tag_attributes = TagSerializer(TagFactory.build()).data
         tag = self.create(tag_attributes)
 
         assert self.request_delete(tag["id"]).status_code == HTTPStatus.FORBIDDEN

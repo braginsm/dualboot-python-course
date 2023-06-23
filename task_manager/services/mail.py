@@ -1,7 +1,7 @@
 from django.core import mail
 from django.template.loader import render_to_string
 
-from main.models import Task
+from task_manager.main.models.task import Task
 
 
 def send_assign_notification(task_id: int) -> None:

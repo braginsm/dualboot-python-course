@@ -2,3 +2,5 @@
 .DS_Store
 .coverage
 .vscode
+.venv
+.idea

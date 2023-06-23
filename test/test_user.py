@@ -3,6 +3,7 @@ from task_manager.main.models.user import User
 from task_manager.main.serializers import UserSerializer
 from test.factories.base import TestViewSetBase
 from test.factories.user_factory import UserFactory
+from django.core.files.uploadedfile import SimpleUploadedFile
 
 
 class TestUserViewSet(TestViewSetBase):
@@ -70,3 +71,23 @@ class TestUserViewSet(TestViewSetBase):
 
         assert self.delete(user_id)
         assert self.request_delete(user_id).status_code == HTTPStatus.NOT_FOUND
+
+    def test_large_avatar(self) -> None:
+        avatar_picture = SimpleUploadedFile("large.jpg", b"x" * 2 * 1024 * 1024)
+        user_attributes = UserSerializer(UserFactory.build()).data
+        user_attributes["avatar_picture"] = avatar_picture
+        response = self.request_create(user_attributes)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert response.json() == {"avatar_picture": ["Maximum size 1048576 exceeded."]}
+
+    def test_avatar_bad_extension(self) -> None:
+        avatar_picture = SimpleUploadedFile("bad_extension.pdf", b"x" * 2 * 1024)
+        user_attributes = UserSerializer(UserFactory.build()).data
+        user_attributes["avatar_picture"] = avatar_picture
+        response = self.request_create(user_attributes)
+
+        assert response.status_code == HTTPStatus.BAD_REQUEST
+        assert response.json() == {
+            "avatar_picture": ["File extension “pdf” is not allowed. Allowed extensions are: jpeg, jpg, png."]
+        }

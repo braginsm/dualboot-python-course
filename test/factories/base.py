@@ -1,7 +1,6 @@
 from http import HTTPStatus
 from django.db import models
-from django.core.files.uploadedfile import SimpleUploadedFile
-from faker.providers import BaseProvider
+
 from typing import List, Optional, OrderedDict, Union
 from django.urls import reverse
 from rest_framework.test import APIClient, APITestCase
@@ -11,10 +10,9 @@ from test.factories.action_client import ActionClient
 
 
 class TestViewSetBase(APITestCase):
-    action_client: Optional[ActionClient] = None
-    api_client: APIClient = None
+    action_client: ActionClient
+    api_client: APIClient
     basename: str
-    fields: List[str]
 
     @staticmethod
     def response_to_list_dict(response: List[OrderedDict], map_function=None) -> List[dict]:
@@ -22,15 +20,6 @@ class TestViewSetBase(APITestCase):
         for item in response:
             new_element = dict(item)
             result.append(map_function(new_element) if map_function else new_element)
-        return result
-
-    @classmethod
-    def to_serialize(self, obj) -> dict:
-        result = {}
-        user_attributes = obj.__dict__
-        for key in self.fields:
-            value = user_attributes[key]
-            result[key] = value.id if value is models.Model else value
         return result
 
     @classmethod
@@ -42,8 +31,8 @@ class TestViewSetBase(APITestCase):
         cls.user = cls.action_client.user
 
     @classmethod
-    def detail_url(cls, key: Union[int, str]) -> str:
-        return reverse(f"{cls.basename}-detail", args=[key])
+    def detail_url(cls, args: List[str | int]) -> str:
+        return reverse(f"{cls.basename}-detail", args=args)
 
     @classmethod
     def list_url(cls, args: List[Union[str, int]] | None = None) -> str:
@@ -59,17 +48,18 @@ class TestViewSetBase(APITestCase):
         assert response.status_code == HTTPStatus.CREATED, response.content
         return response.data
 
-    def request_retrieve(self, args: str | int) -> Response:
+    def request_retrieve(self, args: List[str | int]) -> Response:
         url = self.detail_url(args)
         return self.api_client.get(url)
 
-    def retrieve(self, args: str | int) -> dict:
+    def retrieve(self, args: List[str | int]) -> dict:
         response = self.request_retrieve(args)
         assert response.status_code == HTTPStatus.OK, response.content
         return response.data
 
     def request_list(self, args: List[Union[str, int]] | None = None) -> Response:
         url = self.list_url(args)
+        print(url)
         return self.api_client.get(url)
 
     def list(self, args: List[Union[str, int]] | None = None) -> List[OrderedDict]:
@@ -78,7 +68,7 @@ class TestViewSetBase(APITestCase):
         return response.data
 
     def request_update(self, data: dict, args: str | int) -> Response:
-        url = self.detail_url(args)
+        url = self.detail_url([args])
         return self.api_client.put(url, data=data)
 
     def update(self, data: dict, args: str | int) -> dict:
@@ -87,7 +77,7 @@ class TestViewSetBase(APITestCase):
         return response.data
 
     def request_patch(self, data: dict, args: str | int) -> Response:
-        url = self.detail_url(args)
+        url = self.detail_url([args])
         return self.api_client.patch(url, data=data)
 
     def patch(self, data: dict, args: str | int) -> dict:
@@ -96,7 +86,7 @@ class TestViewSetBase(APITestCase):
         return response.data
 
     def request_delete(self, args: str | int) -> Response:
-        url = self.detail_url(args)
+        url = self.detail_url([args])
         return self.api_client.delete(url)
 
     def delete(self, args: str | int) -> bool:
@@ -124,11 +114,3 @@ class TestViewSetBase(APITestCase):
         response = self.request_patch_single_resource(attributes)
         assert response.status_code == HTTPStatus.OK, response.content
         return response.data
-
-
-class ImageFileProvider(BaseProvider):
-    def image_file(self, fmt: str = "jpeg") -> SimpleUploadedFile:
-        return SimpleUploadedFile(
-            self.generator.file_name(extension=fmt),
-            self.generator.image(image_format=fmt),
-        )

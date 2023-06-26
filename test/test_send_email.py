@@ -2,7 +2,7 @@ from unittest.mock import patch, MagicMock
 from django.core import mail
 from django.template.loader import render_to_string
 from task_manager.main.models.task import Task
-from task_manager.services.mail import send_assign_notification
+from task_manager.tasks import send_assign_notification
 from test.factories.base import TestViewSetBase
 
 

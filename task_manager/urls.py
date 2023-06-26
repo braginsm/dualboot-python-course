@@ -16,15 +16,15 @@ Including another URLconf
 """
 
 from django.urls import include, path, re_path
-from rest_framework.routers import SimpleRouter
-from task_manager.main.admin import task_manager_admin_site
-from task_manager.main import views
-from rest_framework import permissions
-from drf_yasg.views import get_schema_view
 from drf_yasg import openapi
+from drf_yasg.views import get_schema_view
+from rest_framework import permissions
+from rest_framework.routers import SimpleRouter
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
-from task_manager.services.single_resource import BulkRouter
+from task_manager.main import views
+from task_manager.main.admin import task_manager_admin_site
+from task_manager.main.services.single_resource import BulkRouter
 
 router = BulkRouter()
 router.register(r"users", views.UserViewSet, basename="users")
@@ -47,6 +47,9 @@ tasks.register(
     basename="task_tags",
     parents_query_lookups=["task_id"],
 )
+
+router.register(r"countdown", views.CountdownJobViewSet, basename="countdown")
+router.register(r"jobs", views.AsyncJobViewSet, basename="jobs")
 
 schema_view = get_schema_view(
     openapi.Info(

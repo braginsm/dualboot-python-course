@@ -1,4 +1,4 @@
-from test.factories.base import TestViewSetBase
+from test.base import TestViewSetBase
 from unittest.mock import MagicMock, patch
 
 from django.core import mail

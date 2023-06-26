@@ -1,6 +1,6 @@
 import factory
 from factory.django import DjangoModelFactory
-from task_manager.main.models.tag import Tag
+
 from task_manager.main.models.task import Task
 from task_manager.main.models.user import User
 

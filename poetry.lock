@@ -647,6 +647,24 @@ files = [
 python-dateutil = ">=2.4"
 
 [[package]]
+name = "flower"
+version = "2.0.0"
+description = "Celery Flower"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "flower-2.0.0-py2.py3-none-any.whl", hash = "sha256:571f9ed1c57a622e862de35eceb8a4244f023fbcfb7175f53e45ebe679f46d90"},
+    {file = "flower-2.0.0.tar.gz", hash = "sha256:5657785d728a54914256c34fd0551fe2d7152aab08062ebc645bf86b97b8aec5"},
+]
+
+[package.dependencies]
+celery = ">=5.0.5"
+humanize = "*"
+prometheus-client = ">=0.8.0"
+pytz = "*"
+tornado = ">=5.0.0,<7.0.0"
+
+[[package]]
 name = "freezegun"
 version = "1.2.2"
 description = "Let your Python tests travel through time"
@@ -659,6 +677,20 @@ files = [
 
 [package.dependencies]
 python-dateutil = ">=2.7"
+
+[[package]]
+name = "humanize"
+version = "4.6.0"
+description = "Python humanize utilities"
+optional = false
+python-versions = ">=3.7"
+files = [
+    {file = "humanize-4.6.0-py3-none-any.whl", hash = "sha256:401201aca462749773f02920139f302450cb548b70489b9b4b92be39fe3c3c50"},
+    {file = "humanize-4.6.0.tar.gz", hash = "sha256:5f1f22bc65911eb1a6ffe7659bd6598e33dcfeeb904eb16ee1e705a09bf75916"},
+]
+
+[package.extras]
+tests = ["freezegun", "pytest", "pytest-cov"]
 
 [[package]]
 name = "idna"
@@ -1039,6 +1071,20 @@ dev = ["pre-commit", "tox"]
 testing = ["pytest", "pytest-benchmark"]
 
 [[package]]
+name = "prometheus-client"
+version = "0.17.0"
+description = "Python client for the Prometheus monitoring system."
+optional = false
+python-versions = ">=3.6"
+files = [
+    {file = "prometheus_client-0.17.0-py3-none-any.whl", hash = "sha256:a77b708cf083f4d1a3fb3ce5c95b4afa32b9c521ae363354a4a910204ea095ce"},
+    {file = "prometheus_client-0.17.0.tar.gz", hash = "sha256:9c3b26f1535945e85b8934fb374678d263137b78ef85f305b1156c7c881cd11b"},
+]
+
+[package.extras]
+twisted = ["twisted"]
+
+[[package]]
 name = "prompt-toolkit"
 version = "3.0.38"
 description = "Library for building powerful interactive command lines in Python"
@@ -1379,6 +1425,26 @@ files = [
 ]
 
 [[package]]
+name = "tornado"
+version = "6.3.2"
+description = "Tornado is a Python web framework and asynchronous networking library, originally developed at FriendFeed."
+optional = false
+python-versions = ">= 3.8"
+files = [
+    {file = "tornado-6.3.2-cp38-abi3-macosx_10_9_universal2.whl", hash = "sha256:c367ab6c0393d71171123ca5515c61ff62fe09024fa6bf299cd1339dc9456829"},
+    {file = "tornado-6.3.2-cp38-abi3-macosx_10_9_x86_64.whl", hash = "sha256:b46a6ab20f5c7c1cb949c72c1994a4585d2eaa0be4853f50a03b5031e964fc7c"},
+    {file = "tornado-6.3.2-cp38-abi3-manylinux_2_17_aarch64.manylinux2014_aarch64.whl", hash = "sha256:c2de14066c4a38b4ecbbcd55c5cc4b5340eb04f1c5e81da7451ef555859c833f"},
+    {file = "tornado-6.3.2-cp38-abi3-manylinux_2_5_i686.manylinux1_i686.manylinux_2_17_i686.manylinux2014_i686.whl", hash = "sha256:05615096845cf50a895026f749195bf0b10b8909f9be672f50b0fe69cba368e4"},
+    {file = "tornado-6.3.2-cp38-abi3-manylinux_2_5_x86_64.manylinux1_x86_64.manylinux_2_17_x86_64.manylinux2014_x86_64.whl", hash = "sha256:5b17b1cf5f8354efa3d37c6e28fdfd9c1c1e5122f2cb56dac121ac61baa47cbe"},
+    {file = "tornado-6.3.2-cp38-abi3-musllinux_1_1_aarch64.whl", hash = "sha256:29e71c847a35f6e10ca3b5c2990a52ce38b233019d8e858b755ea6ce4dcdd19d"},
+    {file = "tornado-6.3.2-cp38-abi3-musllinux_1_1_i686.whl", hash = "sha256:834ae7540ad3a83199a8da8f9f2d383e3c3d5130a328889e4cc991acc81e87a0"},
+    {file = "tornado-6.3.2-cp38-abi3-musllinux_1_1_x86_64.whl", hash = "sha256:6a0848f1aea0d196a7c4f6772197cbe2abc4266f836b0aac76947872cd29b411"},
+    {file = "tornado-6.3.2-cp38-abi3-win32.whl", hash = "sha256:7efcbcc30b7c654eb6a8c9c9da787a851c18f8ccd4a5a3a95b05c7accfa068d2"},
+    {file = "tornado-6.3.2-cp38-abi3-win_amd64.whl", hash = "sha256:0c325e66c8123c606eea33084976c832aa4e766b7dff8aedd7587ea44a604cdf"},
+    {file = "tornado-6.3.2.tar.gz", hash = "sha256:4b927c4f19b71e627b13f3db2324e4ae660527143f9e1f2e2fb404f3a187e2ba"},
+]
+
+[[package]]
 name = "types-requests"
 version = "2.31.0.1"
 description = "Typing stubs for requests"
@@ -1477,4 +1543,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "^3.10"
-content-hash = "43b87a3ea4db534e1d4e6bf34abb156303e91abe999a203fd601cee37fea11bb"
+content-hash = "9b5f8b502b50ac8fae1ae43ec16e9f92ae640e1cdf2924d244e5f9b972eee1db"

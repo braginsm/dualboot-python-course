@@ -1,8 +1,9 @@
 from http import HTTPStatus
-from task_manager.main.models.user import User
-from task_manager.main.serializers import UserSerializer
 from test.factories.base import TestViewSetBase
 from test.factories.user_factory import UserFactory
+
+from task_manager.main.models.user import User
+from task_manager.main.serializers import UserSerializer
 
 
 class TestUserViewSet(TestViewSetBase):
@@ -49,7 +50,7 @@ class TestUserViewSet(TestViewSetBase):
         user = self.create(user_attributes)
         new_attributes = {**user_attributes, **self.edit_fields}
         expected = self.expected_details(user, new_attributes)
-        new_user = self.update(new_attributes, user["id"])
+        new_user = self.update(new_attributes, args=[user["id"]])
 
         assert new_user == expected
 
@@ -68,5 +69,5 @@ class TestUserViewSet(TestViewSetBase):
         user = self.create(user_attributes)
         user_id = user["id"]
 
-        assert self.delete(user_id)
-        assert self.request_delete(user_id).status_code == HTTPStatus.NOT_FOUND
+        assert self.delete(args=[user_id])
+        assert self.request_delete(args=[user_id]).status_code == HTTPStatus.NOT_FOUND

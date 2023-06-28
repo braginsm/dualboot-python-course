@@ -1,12 +1,11 @@
 from http import HTTPStatus
-from django.db import models
-
-from typing import List, Optional, OrderedDict, Union
-from django.urls import reverse
-from rest_framework.test import APIClient, APITestCase
-from rest_framework.response import Response
-
 from test.factories.action_client import ActionClient
+from typing import List, Optional, OrderedDict, Union
+
+from django.db import models
+from django.urls import reverse
+from rest_framework.response import Response
+from rest_framework.test import APIClient, APITestCase
 
 
 class TestViewSetBase(APITestCase):
@@ -59,7 +58,6 @@ class TestViewSetBase(APITestCase):
 
     def request_list(self, args: List[Union[str, int]] | None = None) -> Response:
         url = self.list_url(args)
-        print(url)
         return self.api_client.get(url)
 
     def list(self, args: List[Union[str, int]] | None = None) -> List[OrderedDict]:
@@ -67,11 +65,11 @@ class TestViewSetBase(APITestCase):
         assert response.status_code == HTTPStatus.OK, response.content
         return response.data
 
-    def request_update(self, data: dict, args: str | int) -> Response:
-        url = self.detail_url([args])
+    def request_update(self, data: dict, args: List[str | int]) -> Response:
+        url = self.detail_url(args)
         return self.api_client.put(url, data=data)
 
-    def update(self, data: dict, args: str | int) -> dict:
+    def update(self, data: dict, args: List[str | int]) -> dict:
         response = self.request_update(data, args)
         assert response.status_code == HTTPStatus.OK, response.content
         return response.data
@@ -85,11 +83,11 @@ class TestViewSetBase(APITestCase):
         assert response.status_code == HTTPStatus.OK, response.content
         return response.data
 
-    def request_delete(self, args: str | int) -> Response:
-        url = self.detail_url([args])
+    def request_delete(self, args: List[str | int]) -> Response:
+        url = self.detail_url(args)
         return self.api_client.delete(url)
 
-    def delete(self, args: str | int) -> bool:
+    def delete(self, args: List[str | int]) -> bool:
         response = self.request_delete(args)
         return response.status_code == HTTPStatus.NO_CONTENT
 

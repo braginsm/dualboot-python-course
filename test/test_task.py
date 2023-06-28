@@ -1,9 +1,10 @@
 from http import HTTPStatus
-from task_manager.main.models.task import Task
-from task_manager.main.serializers import TaskSerializer
 from test.factories.base import TestViewSetBase
 from test.factories.tag_factory import TagFactory
 from test.factories.task_factory import TaskFactory
+
+from task_manager.main.models.task import Task
+from task_manager.main.serializers import TaskSerializer
 
 
 class TestTaskViewSet(TestViewSetBase):
@@ -58,7 +59,7 @@ class TestTaskViewSet(TestViewSetBase):
         created_task = self.create(dict_task)
         new_attributes = {**dict_task, **self.edit_fields}
         expected = self.expected_details(created_task, new_attributes)
-        new_task = self.update(expected, created_task["id"])
+        new_task = self.update(expected, args=[created_task["id"]])
 
         assert self.details_without_keys(new_task) == expected
 
@@ -68,7 +69,7 @@ class TestTaskViewSet(TestViewSetBase):
         created_task = self.create(dict_task)
         new_attributes = {**dict_task, **self.edit_fields}
         expected = self.expected_details(created_task, new_attributes)
-        new_task = self.update(expected, created_task["id"])
+        new_task = self.update(expected, args=[created_task["id"]])
 
         assert self.details_without_keys(new_task) == expected
 
@@ -79,12 +80,12 @@ class TestTaskViewSet(TestViewSetBase):
         task_id = created_task["id"]
         self.user.is_staff = True
 
-        assert self.delete(task_id)
-        assert self.request_delete(task_id).status_code == HTTPStatus.NOT_FOUND
+        assert self.delete(args=[task_id])
+        assert self.request_delete(args=[task_id]).status_code == HTTPStatus.NOT_FOUND
 
     def test_delete_without_permission(self):
         task_attributes = TaskFactory.create(tags=(TagFactory.create(),))
         dict_task = self.task_to_dict(task_attributes)
         created_task = self.create(dict_task)
 
-        assert self.request_delete(created_task["id"]).status_code == HTTPStatus.FORBIDDEN
+        assert self.request_delete(args=[created_task["id"]]).status_code == HTTPStatus.FORBIDDEN

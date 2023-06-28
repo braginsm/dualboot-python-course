@@ -1,7 +1,8 @@
 from http import HTTPStatus
-from task_manager.main.serializers import TagSerializer
 from test.factories.base import TestViewSetBase
 from test.factories.tag_factory import TagFactory
+
+from task_manager.main.serializers import TagSerializer
 
 
 class TestTagViewSet(TestViewSetBase):
@@ -39,7 +40,7 @@ class TestTagViewSet(TestViewSetBase):
         tag = self.create(tag_attributes)
         new_attributes = {**tag_attributes, **self.edit_fields}
         expected = self.expected_details(tag, new_attributes)
-        new_tag = self.update(expected, tag["id"])
+        new_tag = self.update(expected, args=[tag["id"]])
 
         assert new_tag == expected
 
@@ -57,11 +58,11 @@ class TestTagViewSet(TestViewSetBase):
         tag_id = tag["id"]
         self.user.is_staff = True
 
-        assert self.delete(tag_id)
-        assert self.request_delete(tag_id).status_code == HTTPStatus.NOT_FOUND
+        assert self.delete(args=[tag_id])
+        assert self.request_delete(args=[tag_id]).status_code == HTTPStatus.NOT_FOUND
 
     def test_delete_without_permission(self):
         tag_attributes = TagSerializer(TagFactory.build()).data
         tag = self.create(tag_attributes)
 
-        assert self.request_delete(tag["id"]).status_code == HTTPStatus.FORBIDDEN
+        assert self.request_delete(args=[tag["id"]]).status_code == HTTPStatus.FORBIDDEN

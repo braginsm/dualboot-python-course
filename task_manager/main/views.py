@@ -1,17 +1,20 @@
+from http import HTTPStatus
 from typing import cast
+
+import django_filters
 from rest_framework import viewsets
 from rest_framework.permissions import IsAuthenticated
-import django_filters
+from rest_framework.response import Response
+from rest_framework_extensions.mixins import NestedViewSetMixin
+
 from task_manager.main.models.tag import Tag
 from task_manager.main.models.task import Task
 from task_manager.main.models.user import User
 from task_manager.main.permissions import DeleteOnlyForStaff
-from task_manager.main.serializers import TagSerializer, TaskSerializer, UserSerializer
-from task_manager.services.single_resource import (
-    SingleResourceMixin,
-    SingleResourceUpdateMixin,
-)
-from rest_framework_extensions.mixins import NestedViewSetMixin
+from task_manager.main.serializers import (TagSerializer, TaskSerializer,
+                                           UserSerializer)
+from task_manager.services.single_resource import (SingleResourceMixin,
+                                                   SingleResourceUpdateMixin)
 
 
 class UserFilter(django_filters.FilterSet):
@@ -74,9 +77,17 @@ class UserTasksViewSet(NestedViewSetMixin, viewsets.ReadOnlyModelViewSet):
     serializer_class = TaskSerializer
 
 
-class TaskTagsViewSet(viewsets.ReadOnlyModelViewSet):
+class TaskTagsViewSet(TagViewSet):
     serializer_class = TagSerializer
 
-    def get_queryset(self):
+    def get_queryset(self) -> list[Tag]:
         task_id = self.kwargs["parent_lookup_task_id"]
         return Task.objects.get(pk=task_id).tags.all()
+    
+    def create(self, request, *args, **kwargs) -> Response:
+        task_id = kwargs['parent_lookup_task_id']
+        tag = Tag.objects.create(title=request.data['title'])
+        task = Task.objects.get(pk=task_id)
+        task.tags.add(tag)
+        task.save()
+        return Response(data=TagSerializer(tag).data, status=HTTPStatus.CREATED)

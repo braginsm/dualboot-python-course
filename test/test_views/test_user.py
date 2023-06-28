@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from task_manager.main.models.user import User
 from task_manager.main.serializers import UserSerializer
-from test.factories.base import TestViewSetBase
+from test.base import TestViewSetBase
 from test.factories.user_factory import UserFactory
 from django.core.files.uploadedfile import SimpleUploadedFile
 

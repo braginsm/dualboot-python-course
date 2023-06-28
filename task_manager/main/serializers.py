@@ -1,11 +1,16 @@
+from typing import Any
+
+from celery.result import AsyncResult
 from django.conf import settings
 from django.core.validators import FileExtensionValidator
 from rest_framework import serializers
 
 from task_manager.main.validators import FileMaxSizeValidator
-from .models.user import User
-from .models.task import Task
+from task_manager.tasks import countdown
+
 from .models.tag import Tag
+from .models.task import Task
+from .models.user import User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -16,6 +21,7 @@ class UserSerializer(serializers.ModelSerializer):
             FileExtensionValidator(["jpeg", "jpg", "png"]),
         ],
     )
+
     class Meta:
         model = User
         fields = ("id", "username", "first_name", "last_name", "email", "role", "avatar_picture")
@@ -43,3 +49,32 @@ class TagSerializer(serializers.ModelSerializer):
     class Meta:
         model = Tag
         fields = ("id", "title")
+
+
+class RepresentationSerializer(serializers.Serializer):
+    def update(self, instance: Any, validated_data: dict) -> Any:
+        pass
+
+    def create(self, validated_data: dict) -> Any:
+        pass
+
+
+class CountdownJobSerializer(RepresentationSerializer):
+    seconds = serializers.IntegerField(write_only=True)
+
+    task_id = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
+
+    def create(self, validated_data: dict) -> AsyncResult:
+        return countdown.delay(**validated_data)
+
+
+class ErrorSerializer(RepresentationSerializer):
+    non_field_errors: serializers.ListSerializer = serializers.ListSerializer(child=serializers.CharField())
+
+
+class JobSerializer(RepresentationSerializer):
+    task_id = serializers.CharField(read_only=True)
+    status = serializers.CharField(read_only=True)
+    errors = ErrorSerializer(read_only=True, required=False)
+    result = serializers.CharField(required=False)

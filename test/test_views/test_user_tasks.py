@@ -1,7 +1,5 @@
 from http import HTTPStatus
-from task_manager.main.models.user import User
-
-from test.factories.base import TestViewSetBase
+from test.base import TestViewSetBase
 
 
 class TestUserTasksViewSet(TestViewSetBase):

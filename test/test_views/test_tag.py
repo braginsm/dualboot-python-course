@@ -1,6 +1,6 @@
 from http import HTTPStatus
 from task_manager.main.serializers import TagSerializer
-from test.factories.base import TestViewSetBase
+from test.base import TestViewSetBase
 from test.factories.tag_factory import TagFactory
 
 

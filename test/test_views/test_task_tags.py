@@ -1,5 +1,5 @@
 from task_manager.main.models.task import Task
-from test.factories.base import TestViewSetBase
+from test.base import TestViewSetBase
 
 
 class TestUserTasksViewSet(TestViewSetBase):

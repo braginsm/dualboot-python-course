@@ -1,4 +1,4 @@
-from test.factories.base import TestViewSetBase
+from test.base import TestViewSetBase
 
 
 class TestUserViewSet(TestViewSetBase):

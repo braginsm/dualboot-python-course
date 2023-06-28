@@ -1,7 +1,7 @@
 from http import HTTPStatus
 from task_manager.main.models.task import Task
 from task_manager.main.serializers import TaskSerializer
-from test.factories.base import TestViewSetBase
+from test.base import TestViewSetBase
 from test.factories.tag_factory import TagFactory
 from test.factories.task_factory import TaskFactory
 

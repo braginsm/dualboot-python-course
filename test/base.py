@@ -1,12 +1,10 @@
 from http import HTTPStatus
-from django.db import models
-
-from typing import List, Optional, OrderedDict, Union
-from django.urls import reverse
-from rest_framework.test import APIClient, APITestCase
-from rest_framework.response import Response
-
 from test.factories.action_client import ActionClient
+from typing import List, OrderedDict, Union
+
+from django.urls import reverse
+from rest_framework.response import Response
+from rest_framework.test import APIClient, APITestCase
 
 
 class TestViewSetBase(APITestCase):
@@ -40,7 +38,8 @@ class TestViewSetBase(APITestCase):
 
     def request_create(self, data: dict, args: List[Union[str, int]] | None = None) -> Response:
         url = self.list_url(args)
-        del data["id"]
+        if "id" in data.keys():
+            del data["id"]
         return self.api_client.post(url, data=data)
 
     def create(self, data: dict, args: List[Union[str, int]] | None = None) -> dict:
